@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Season 2 & 3 User Data Report</title>
+    <style>
+        /* Basic Reset & Body Styling */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #eef2f7; /* Soft, professional background */
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Center content horizontally */
+            min-height: 100vh; /* Ensure it takes full viewport height */
+        }
+
+        /* Container for centering and width control */
+        .container {
+            width: 100%;
+            max-width: 1600px; /* Max width for large screens */
+            margin: 0 auto; /* Center the container */
+            background-color: #ffffff;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            overflow-x: auto; /* Enable horizontal scroll for small screens if needed */
+        }
+
+        /* Header Styling */
+        h1 {
+            color: #1a73e8; /* Google-like blue */
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            letter-spacing: 1px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+        }
+
+        /* Search Bar Styling */
+        .search-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 25px;
+            width: 100%;
+            max-width: 500px; /* Limit search bar width */
+            margin-left: auto; /* Push to the right */
+            margin-right: auto; /* Center within its max-width */
+            background-color: #f8f9fa;
+            padding: 10px 15px;
+            border-radius: 8px;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.07);
+        }
+
+        .search-container input[type="text"] {
+            flex-grow: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1em;
+            margin-right: 10px;
+            background-color: transparent;
+            outline: none;
+            color: #333;
+        }
+
+        .search-container input[type="text"]::placeholder {
+            color: #999;
+        }
+
+        .search-container button {
+            background-color: #1a73e8;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s ease;
+        }
+
+        .search-container button:hover {
+            background-color: #0f5ec1;
+        }
+
+        /* Notes Section */
+        .notes {
+            margin-top: 35px;
+            margin-bottom: 30px;
+            padding: 20px 25px;
+            background-color: #e8f0fe; /* Light blue background for notes */
+            border-left: 6px solid #1a73e8;
+            border-radius: 5px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.07);
+            width: 100%;
+            box-sizing: border-box; /* Include padding in width */
+        }
+
+        .notes h3 {
+            margin-top: 0;
+            color: #1a73e8;
+            font-size: 1.4em;
+            margin-bottom: 15px;
+        }
+
+        .notes ul {
+            padding-left: 25px;
+            margin: 0;
+            list-style: disc;
+            color: #444;
+        }
+
+        .notes li {
+            margin-bottom: 8px;
+            font-size: 1.05em;
+        }
+
+        /* Table Styling */
+        table {
+            width: 100%;
+            border-collapse: separate; /* For rounded corners on cells */
+            border-spacing: 0; /* No space between cells by default */
+            margin-top: 0; /* Remove margin if notes are present */
+            font-size: 0.95em;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Slightly softer shadow */
+            border-radius: 10px; /* Rounded corners for the table */
+            overflow: hidden; /* Ensure rounded corners clip content */
+        }
+
+        /* Table Header */
+        th {
+            background-color: #4285f4; /* Professional blue */
+            color: white;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 15px 18px;
+            text-align: left;
+            border-bottom: 2px solid #357ae8; /* Darker blue border */
+            white-space: nowrap; /* Prevent header text from wrapping */
+        }
+
+        /* Table Body Rows */
+        tr {
+            background-color: #ffffff;
+            transition: background-color 0.3s ease-in-out, transform 0.2s ease-in-out; /* Animation */
+        }
+
+        tr:nth-child(even) {
+            background-color: #f8f9fa; /* Very light grey for even rows */
+        }
+
+        tr:hover {
+            background-color: #e8f0fe; /* Light blue hover effect */
+            transform: translateY(-3px); /* Subtle lift effect */
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.12); /* Enhanced shadow on hover */
+        }
+
+        /* Table Data Cells */
+        td {
+            padding: 12px 18px;
+            border-bottom: 1px solid #e0e0e0; /* Light grey separator */
+            vertical-align: middle; /* Center text vertically */
+        }
+
+        /* Wallet Address Styling & Copy Button */
+        .wallet-container {
+            display: flex;
+            align-items: center;
+            font-family: 'Consolas', 'Monaco', 'Andale Mono', 'Ubuntu Mono', monospace;
+            font-size: 0.85em;
+            color: #00796b; /* Teal color for wallets */
+            word-break: break-all; /* Break long wallet addresses */
+        }
+
+        .wallet-address {
+            margin-right: 8px; /* Space between address and button */
+            flex-grow: 1; /* Allow address to take available space */
+        }
+
+        .copy-btn {
+            background-color: #1a73e8;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8em;
+            transition: background-color 0.3s ease;
+            white-space: nowrap; /* Prevent button text from wrapping */
+        }
+
+        .copy-btn:hover {
+            background-color: #0f5ec1;
+        }
+
+        .copy-btn.copied { /* Style for when copied */
+            background-color: #34a853; /* Green */
+            cursor: default;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 992px) { /* Medium screens and below */
+            h1 {
+                font-size: 2em;
+            }
+            .container {
+                padding: 20px;
+            }
+            th, td {
+                padding: 10px 12px;
+            }
+            .notes {
+                padding: 15px;
+            }
+            .notes li {
+                font-size: 1em;
+            }
+
+            .search-container {
+                max-width: 100%; /* Full width on smaller screens */
+            }
+
+            /* Stack table cells for very small screens */
+            table, thead, tbody, th, td, tr {
+                display: block;
+            }
+            thead tr {
+                position: absolute;
+                top: -9999px;
+                left: -9999px;
+            }
+            tr { border: 1px solid #ccc; margin-bottom: 10px; }
+            td {
+                border: none;
+                border-bottom: 1px solid #eee;
+                position: relative;
+                padding-left: 50%;
+                text-align: right; /* Align data to the right when stacked */
+                word-wrap: break-word; /* Allow word wrapping in stacked cells */
+            }
+            td:before {
+                position: absolute;
+                top: 6px;
+                left: 6px;
+                width: 45%;
+                padding-right: 10px;
+                white-space: nowrap;
+                content: attr(data-label); /* Use data-label attribute */
+                font-weight: bold;
+                color: #333;
+                text-align: left; /* Align label to the left */
+            }
+            .wallet-container {
+                flex-direction: column; /* Stack wallet and button */
+                align-items: flex-end; /* Align items to the right */
+                text-align: right;
+            }
+            .wallet-address {
+                 margin-right: 0; /* Remove margin when stacked */
+                 margin-bottom: 5px; /* Space between address and button when stacked */
+                 width: 100%; /* Make address take full width when stacked */
+            }
+             .wallet-address:before {
+                content: "Wallet Address:"; /* Specific label for wallet */
+            }
+            .copy-btn {
+                width: 100%; /* Make button take full width when stacked */
+            }
+        }
+
+        /* Further adjustments for very small screens */
+        @media (max-width: 576px) {
+            body {
+                padding: 10px;
+            }
+            .container {
+                padding: 15px;
+            }
+            h1 {
+                font-size: 1.7em;
+            }
+            .notes {
+                padding: 10px;
+            }
+            .notes h3 {
+                font-size: 1.2em;
+            }
+            th, td {
+                padding: 8px 10px;
+            }
+             td:before {
+                top: 3px;
+                left: 3px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Modified Header -->
+        <h1>Season 2 & 3 User Data - PXFX Overview</h1>
+
+        <!-- Search Bar -->
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="Search by Username, Wallet, or Chat ID...">
+            <button onclick="searchTable()">Search</button>
+        </div>
+
+        <!-- Modified Notes Section -->
+        <div class="notes">
+            <h3>Important Information Regarding User Data & PXFX</h3>
+            <ul>
+                <li>This page displays consolidated user data from Season 2 and Season 3.</li>
+                <li><strong>Balance Adjustments:</strong>
+                    <ul>
+                        <li>Users present in Season 2 received a <strong>5% increase</strong>.</li>
+                        <li>Users present in Season 3 received a <strong>1% increase</strong>.</li>
+                        <li>Users in <strong>both seasons</strong> received a combined <strong>6% increase</strong> (5% + 1%).</li>
+                    </ul>
+                </li>
+                <li><strong>PXFX Information:</strong></li>
+                <li>All displayed figures represent your total received PXFX (or equivalent currency) based on the calculated balances.</li>
+                <li>Please review the data below carefully.</li>
+            </ul>
+        </div>
+
+        <table id="userTable">
+            <thead>
+                <tr>
+                    <th data-label="Chat ID">Chat ID</th>
+                    <th data-label="Username">Username</th>
+                    <th data-label="Balance">Balance</th>
+                    <th data-label="Referrals">Referrals</th>
+                    <th data-label="Wallet">Wallet</th>
+                    <th data-label="Farming Start Time">Farming Start Time</th>
+                    <th data-label="Has Claimed Welcome Bonus">Welcome Bonus Claimed</th>
+                    <th data-label="Last Withdrawal">Last Withdrawal</th>
+                    <th data-label="Last Claim Timestamp">Last Claim Timestamp</th>
+                    <th data-label="Last Daily Claim Day">Last Daily Claim Day</th>
+                    <th data-label="Referred By">Referred By</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Row 1 -->
+                <tr>
+                    <td data-label="Chat ID">229827102</td>
+                    <td data-label="Username">Ex7667336e3179</td>
+                    <td data-label="Balance">97177.8174</td>
+                    <td data-label="Referrals">0</td>
+                    <td data-label="Wallet">
+                        <div class="wallet-container">
+                            <span class="wallet-address">UQBvS7egoWQvNemTVjOXapsE-5yHPjqM5QUN2PIKH3K</span>
+                            <button class="copy-btn" onclick="copyToClipboard(this, 'UQBvS7egoWQvNemTVjOXapsE-5yHPjqM5QUN2PIKH3K')">Copy</button>
+                        </div>
+                    </td>
+                    <td data-label="Farming Start Time">1.76E+12</td>
+                    <td data-label="Has Claimed Welcome Bonus">TRUE</td>
+                    <td data-label="Last Withdrawal">0</td>
+                    <td data-label="Last Claim Timestamp">1.76E+12</td>
+                    <td data-label="Last Daily Claim Day">6</td>
+                    <td data-label="Referred By"></td>
+                </tr>
+                <!-- Row 2 -->
+                <tr>
+                    <td data-label="Chat ID">290011572</td>
+                    <td data-label="Username">MagySalim</td>
+                    <td data-label="Balance">7205.2851</td>
+                    <td data-label="Referrals">0</td>
+                    <td data-label="Wallet">
+                        <div class="wallet-container">
+                            <span class="wallet-address">UQBUIf0nWGjdxI3HiLdSGPvxuxKdZeIXQ3rPA4L3sFSLc-fv</span>
+                            <button class="copy-btn" onclick="copyToClipboard(this, 'UQBUIf0nWGjdxI3HiLdSGPvxuxKdZeIXQ3rPA4L3sFSLc-fv')">Copy</button>
+                        </div>
+                    </td>
+                    <td data-label="Farming Start Time">1.76E+12</td>
+                    <td data-label="Has Claimed Welcome Bonus">TRUE</td>
+                    <td data-label="Last Withdrawal">0</td>
+                    <td data-label="Last Claim Timestamp">1.76E+12</td>
+                    <td data-label="Last Daily Claim Day">1</td>
+                    <td data-label="Referred By">7292247729</td>
+                </tr>
+                <!-- Row 3 -->
+                <tr>
+                    <td data-label="Chat ID">847775343</td>
+                    <td data-label="Username">uzabiliti</td>
+                    <td data-label="Balance">24523.5864</td>
+                    <td data-label="Referrals">0</td>
+                    <td data-label="Wallet">
+                        <div class="wallet-container">
+                            <span class="wallet-address">UQAejOldeFiVnFJh1KosiTCQvv369Pseikht3s6bne4tjZmM</span>
+                            <button class="copy-btn" onclick="copyToClipboard(this, 'UQAejOldeFiVnFJh1KosiTCQvv369Pseikht3s6bne4tjZmM')">Copy</button>
+                        </div>
+                    </td>
+                    <td data-label="Farming Start Time">1.76E+12</td>
+                    <td data-label="Has Claimed Welcome Bonus">TRUE</td>
+                    <td data-label="Last Withdrawal">0</td>
+                    <td data-label="Last Claim Timestamp">1.76E+12</td>
+                    <td data-label="Last Daily Claim Day">1</td>
+                    <td data-label="Referred By">7292247729</td>
+                </tr>
+                <!-- Row 4 -->
+                <tr>
+                    <td data-label="Chat ID">960798135</td>
+                    <td data-label="Username">AeIsmail</td>
+                    <td data-label="Balance">133742.1774</td>
+                    <td data-label="Referrals">2</td>
+                    <td data-label="Wallet">
+                        <div class="wallet-container">
+                            <span class="wallet-address">UQDwUEx56QIIUkAxegVCqEVrOLSRUIRsFqOePvxblodwdnj7</span>
+                            <button class="copy-btn" onclick="copyToClipboard(this, 'UQDwUEx56QIIUkAxegVCqEVrOLSRUIRsFqOePvxblodwdnj7')">Copy</button>
+                        </div>
+                    </td>
+                    <td data-label="Farming Start Time">1.76E+12</td>
+                    <td data-label="Has Claimed Welcome Bonus">TRUE</td>
+                    <td data-label="Last Withdrawal"></td>
+                    <td data-label="Last Claim Timestamp">1.76E+12</td>
+                    <td data-label="Last Daily Claim Day">6</td>
+                    <td data-label="Referred By"></td>
+                </tr>
+                <!-- Row 5 -->
+                <tr>
+                    <td data-label="Chat ID">5194246164</td>
+                    <td data-label="Username">fixal13</td>
+                    <td data-label="Balance">14638.5700</td>
+                    <td data-label="Referrals">0</td>
+                    <td data-label="Wallet">
+                        <div class="wallet-container">
+                            <span class="wallet-address">UQDKON2fRTBdHjScje7swNEprzyY_cyE6CcYNBLzmMNRsp8i</span>
+                            <button class="copy-btn" onclick="copyToClipboard(this, 'UQDKON2fRTBdHjScje7swNEprzyY_cyE6CcYNBLzmMNRsp8i')">Copy</button>
+                        </div>
+                    </td>
+                    <td data-label="Farming Start Time">1.76E+12</td>
+                    <td data-label="Has Claimed Welcome Bonus">TRUE</td>
+                    <td data-label="Last Withdrawal">0</td>
+                    <td data-label="Last Claim Timestamp">1.76E+12</td>
+                    <td data-label="Last Daily Claim Day">1</td>
+                    <td data-label="Referred By">7292247729</td>
+                </tr>
+                <!-- Row 6 -->
+                <tr>
+                    <td data-label="Chat ID">5999257258</td>
+                    <td data-label="Username">ITS_SOYKOT_102</td>
+                    <td data-label="Balance">6619.6450</td>
+                    <td data-label="Referrals">11</td>
+                    <td data-label="Wallet">
+                        <div class="wallet-container">
+                            <span class="wallet-address">UQCeav8IzZAZ640dQiRUYXLPL35F4qwjxW9U8n7IipGAY5KF</span>
+                            <button class="copy-btn" onclick="copyToClipboard(this, 'UQCeav8IzZAZ640dQiRUYXLPL35F4qwjxW9U8n7IipGAY5KF')">Copy</button>
+                        </div>
+                    </td>
+                    <td data-label="Farming Start Time">1.76E+12</td>
+                    <td data-label="Has Claimed Welcome Bonus">TRUE</td>
+                    <td data-label="Last Withdrawal">0</td>
+                    <td data-label="Last Claim Timestamp">1.76E+12</td>
+                    <td data-label="Last Daily Claim Day">4</td>
+                    <td data-label="Referred By">7572875104</td>
+                </tr>
+                <!-- Row 7 -->
+                <tr>
+                    <td data-label="Chat ID">6375799266</td>
+                    <td data-label="Username">Ivnchshn</td>
+                    <td data-label="Balance">8315.0367</td>
+                    <td data-label="Referrals">0</td>
+                    <td data-label="Wallet">
+                        <div class="wallet-container">
+                            <span class="wallet-address">UQBXXcNr_-V2L9cUySHCQzXry1Q7OBXSe2mRWKAePcPQvTAu</span>
+                            <button class="copy-btn" onclick="copyToClipboard(this, 'UQBXXcNr_-V2L9cUySHCQzXry1Q7OBXSe2mRWKAePcPQvTAu')">Copy</button>
+                        </div>
+                    </td>
+                    <td data-label="Farming Start Time">1.76E+12</td>
+                    <td data-label="Has Claimed Welcome Bonus">TRUE</td>
+                    <td data-label="Last Withdrawal">0</td>
+                    <td data-label="Last Claim Timestamp">1.76E+12</td>
+                    <td data-label="Last Daily Claim Day">6</td>
+                    <td data-label="Referred By">7292247729</td>
+                </tr>
+                <!-- Row 8 -->
+                <tr>
+                    <td data-label="Chat ID">6588322907</td>
+                    <td data-label="Username">CA0571</td>
+                    <td data-label="Balance">7163.2551</td>
+                    <td data-label="Referrals">11</td>
+                    <td data-label="Wallet">
+                        <div class="wallet-container">
+                            <span class="wallet-address">UQDRA4JGufpHcP9xmmyUdCqO0UGx7Pb5Xh6hDIOJfUtj1vpE</span>
+                            <button class="copy-btn" onclick="copyToClipboard(this, 'UQDRA4JGufpHcP9xmmyUdCqO0UGx7Pb5Xh6hDIOJfUtj1vpE')">Copy</button>
+                        </div>
+                    </td>
+                    <td data-label="Farming Start Time">1.76E+12</td>
+                    <td data-label="Has Claimed Welcome Bonus">TRUE</td>
+                    <td data-label="Last Withdrawal">0</td>
+                    <td data-label="Last Claim Timestamp">1.76E+12</td>
+                    <td data-label="Last Daily Claim Day">5</td>
+                    <td data-label="Referred By"></td>
+                </tr>
+                <!-- Row 9 -->
+                <tr>
+                    <td data-label="Chat ID">7221039184</td>
+                    <td data-label="Username">testmaler</td>
+                    <td data-label="Balance">21828.5883</td>
+                    <td data-label="Referrals">0</td>
+                    <td data-label="Wallet">
+                        <div class="wallet-container">
+                            <span class="wallet-address">UQA_F5oDoG1OiLV5_5Emvy7QJ4QOLSnwnTSFuqinmgZHJ6N4</span>
+                            <button class="copy-btn" onclick="copyToClipboard(this, 'UQA_F5oDoG1OiLV5_5Emvy7QJ4QOLSnwnTSFuqinmgZHJ6N4')">Copy</button>
+                        </div>
+                    </td>
+                    <td data-label="Farming Start Time">1.76E+12</td>
+                    <td data-label="Has Claimed Welcome Bonus">TRUE</td>
+                    <td data-label="Last Withdrawal">0</td>
+                    <td data-label="Last Claim Timestamp"></td>
+                    <td data-label="Last Daily Claim Day"></td>
+                    <td data-label="Referred By"></td>
+                </tr>
+                <!-- Row 10 -->
+                <tr>
+                    <td data-label="Chat ID">7848148646</td>
+                    <td data-label="Username">lord02025</td>
+                    <td data-label="Balance">41480.5142</td>
+                    <td data-label="Referrals"></td>
+                    <td data-label="Wallet">
+                        <div class="wallet-container">
+                            <span class="wallet-address">UQCtQIvxXZtISfLNByO3QluvYMV5bJvRGWYrOlopshWDjokE</span>
+                            <button class="copy-btn" onclick="copyToClipboard(this, 'UQCtQIvxXZtISfLNByO3QluvYMV5bJvRGWYrOlopshWDjokE')">Copy</button>
+                        </div>
+                    </td>
+                    <td data-label="Farming Start Time">1.76E+12</td>
+                    <td data-label="Has Claimed Welcome Bonus">TRUE</td>
+                    <td data-label="Last Withdrawal">1.76E+12</td>
+                    <td data-label="Last Claim Timestamp">1.76E+12</td>
+                    <td data-label="Last Daily Claim Day">2</td>
+                    <td data-label="Referred By"></td>
+                </tr>
+                <!-- Add more rows here if you have more data -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        // --- Responsive Table Script ---
+        document.addEventListener('DOMContentLoaded', function() {
+            const table = document.querySelector('table');
+            const headers = Array.from(table.querySelectorAll('th'));
+            const dataRows = Array.from(table.querySelectorAll('tbody tr'));
+
+            dataRows.forEach(row => {
+                const cells = Array.from(row.querySelectorAll('td'));
+                cells.forEach((cell, index) => {
+                    // Only add data-label if it's not already set by the direct HTML
+                    if (!cell.hasAttribute('data-label')) {
+                        const headerText = headers[index].getAttribute('data-label');
+                        cell.setAttribute('data-label', headerText);
+                    }
+                });
+            });
+        });
+
+        // --- Copy to Clipboard Function ---
+        function copyToClipboard(button, text) {
+            navigator.clipboard.writeText(text).then(() => {
+                // Change button text and style to indicate success
+                const originalText = button.textContent;
+                button.textContent = 'Copied!';
+                button.classList.add('copied');
+
+                // Revert after a few seconds
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.classList.remove('copied');
+                }, 2000); // 2 seconds
+            }).catch(err => {
+                console.error('Failed to copy text: ', err);
+                // Optionally, provide user feedback for failure
+                const originalText = button.textContent;
+                button.textContent = 'Failed!';
+                button.classList.add('error'); // You might want to add an .error class for styling
+                 setTimeout(() => {
+                    button.textContent = originalText;
+                    button.classList.remove('error');
+                }, 2000);
+            });
+        }
+
+        // --- Search Functionality ---
+        function searchTable() {
+            const input = document.getElementById('searchInput');
+            const filter = input.value.toLowerCase();
+            const table = document.getElementById('userTable');
+            const rows = table.getElementsByTagName('tr');
+
+            for (let i = 1; i < rows.length; i++) { // Start from 1 to skip the header row
+                const cells = rows[i].getElementsByTagName('td');
+                let found = false;
+
+                // Iterate through relevant cells for searching
+                // Index 0: Chat ID, Index 1: Username, Index 4: Wallet
+                const searchIndices = [0, 1, 4];
+
+                for (let j = 0; j < cells.length; j++) {
+                    // Check if the current cell index is one we want to search in
+                    if (searchIndices.includes(j)) {
+                        const cellText = cells[j].textContent.toLowerCase();
+
+                        // For the wallet column, we need to get the text from the span within the div
+                        if (j === 4) { // Wallet column
+                            const walletSpan = cells[j].querySelector('.wallet-address');
+                            if (walletSpan) {
+                                const walletText = walletSpan.textContent.toLowerCase();
+                                if (walletText.includes(filter)) {
+                                    found = true;
+                                    break; // Found a match, no need to check other cells in this row
+                                }
+                            }
+                        } else { // For Chat ID and Username
+                            if (cellText.includes(filter)) {
+                                found = true;
+                                break; // Found a match
+                            }
+                        }
+                    }
+                }
+
+                if (found) {
+                    rows[i].style.display = ''; // Show the row
+                } else {
+                    rows[i].style.display = 'none'; // Hide the row
+                }
+            }
+        }
+
+        // Optional: Trigger search on pressing Enter in the input field
+        document.getElementById('searchInput').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault(); // Prevent default form submission if it were a form
+                searchTable();
+            }
+        });
+
+    </script>
+
+</body>
+</html>
