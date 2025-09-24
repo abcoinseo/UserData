@@ -3,645 +3,725 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Season 2 & 3 User Data Report</title>
+    <title>User Data Editor (Single File)</title>
     <style>
-        /* Basic Reset & Body Styling */
+        /* --- Embedded CSS Styles --- */
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Arial', sans-serif;
+            margin: 20px;
+            background-color: #f4f7f6;
+            color: #333;
             line-height: 1.6;
-            margin: 0;
-            padding: 20px;
-            background-color: #eef2f7; /* Soft, professional background */
-            color: #333;
-            display: flex;
-            flex-direction: column;
-            align-items: center; /* Center content horizontally */
-            min-height: 100vh; /* Ensure it takes full viewport height */
         }
 
-        /* Container for centering and width control */
-        .container {
-            width: 100%;
-            max-width: 1600px; /* Max width for large screens */
-            margin: 0 auto; /* Center the container */
-            background-color: #ffffff;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-            overflow-x: auto; /* Enable horizontal scroll for small screens if needed */
-        }
-
-        /* Header Styling */
         h1 {
-            color: #1a73e8; /* Google-like blue */
             text-align: center;
+            color: #2c3e50;
             margin-bottom: 30px;
-            font-size: 2.5em;
-            letter-spacing: 1px;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
         }
 
-        /* Search Bar Styling */
-        .search-container {
+        .controls {
+            text-align: center;
+            margin-bottom: 20px;
             display: flex;
-            align-items: center;
-            margin-bottom: 25px;
-            width: 100%;
-            max-width: 500px; /* Limit search bar width */
-            margin-left: auto; /* Push to the right */
-            margin-right: auto; /* Center within its max-width */
-            background-color: #f8f9fa;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap; /* Allow controls to wrap on smaller screens */
+        }
+
+        #searchBox {
             padding: 10px 15px;
-            border-radius: 8px;
-            box-shadow: inset 0 2px 5px rgba(0,0,0,0.07);
-        }
-
-        .search-container input[type="text"] {
-            flex-grow: 1;
-            padding: 10px;
-            border: none;
+            border: 1px solid #ccc;
             border-radius: 5px;
-            font-size: 1em;
-            margin-right: 10px;
-            background-color: transparent;
+            font-size: 1rem;
+            width: 250px;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        #searchBox:focus {
             outline: none;
-            color: #333;
+            border-color: #3498db;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1), 0 0 0 2px rgba(52, 152, 219, 0.3);
         }
 
-        .search-container input[type="text"]::placeholder {
-            color: #999;
-        }
 
-        .search-container button {
-            background-color: #1a73e8;
+        #saveAllButton {
+            padding: 10px 20px;
+            background-color: #3498db;
             color: white;
             border: none;
-            padding: 10px 15px;
             border-radius: 5px;
             cursor: pointer;
-            font-size: 1em;
+            font-size: 1rem;
             transition: background-color 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
 
-        .search-container button:hover {
-            background-color: #0f5ec1;
+        #saveAllButton:hover {
+            background-color: #2980b9;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+        }
+        #saveAllButton:active {
+            transform: translateY(1px);
         }
 
-        /* Notes Section */
-        .notes {
-            margin-top: 35px;
-            margin-bottom: 30px;
-            padding: 20px 25px;
-            background-color: #e8f0fe; /* Light blue background for notes */
-            border-left: 6px solid #1a73e8;
-            border-radius: 5px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.07);
-            width: 100%;
-            box-sizing: border-box; /* Include padding in width */
+        .data-container {
+            overflow-x: auto; /* Enables horizontal scrolling for large tables */
+            background-color: #fff;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            margin-top: 20px;
+            padding: 10px;
         }
 
-        .notes h3 {
-            margin-top: 0;
-            color: #1a73e8;
-            font-size: 1.4em;
-            margin-bottom: 15px;
-        }
-
-        .notes ul {
-            padding-left: 25px;
-            margin: 0;
-            list-style: disc;
-            color: #444;
-        }
-
-        .notes li {
-            margin-bottom: 8px;
-            font-size: 1.05em;
-        }
-
-        /* Table Styling */
         table {
             width: 100%;
-            border-collapse: separate; /* For rounded corners on cells */
-            border-spacing: 0; /* No space between cells by default */
-            margin-top: 0; /* Remove margin if notes are present */
-            font-size: 0.95em;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Slightly softer shadow */
-            border-radius: 10px; /* Rounded corners for the table */
-            overflow: hidden; /* Ensure rounded corners clip content */
+            border-collapse: collapse;
+            /* No margin-top here, container has padding */
         }
 
-        /* Table Header */
-        th {
-            background-color: #4285f4; /* Professional blue */
-            color: white;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            padding: 15px 18px;
+        th, td {
+            padding: 12px 15px;
             text-align: left;
-            border-bottom: 2px solid #357ae8; /* Darker blue border */
-            white-space: nowrap; /* Prevent header text from wrapping */
+            border: 1px solid #e0e0e0;
+            white-space: nowrap; /* Prevent text from wrapping in table cells */
         }
 
-        /* Table Body Rows */
-        tr {
-            background-color: #ffffff;
-            transition: background-color 0.3s ease-in-out, transform 0.2s ease-in-out; /* Animation */
+        thead {
+            background-color: #34495e;
+            color: #ffffff;
+            border-radius: 8px 8px 0 0; /* Round top corners */
         }
 
-        tr:nth-child(even) {
-            background-color: #f8f9fa; /* Very light grey for even rows */
+        th {
+            font-weight: bold;
+            font-size: 0.95rem;
+            letter-spacing: 0.5px;
         }
 
-        tr:hover {
-            background-color: #e8f0fe; /* Light blue hover effect */
-            transform: translateY(-3px); /* Subtle lift effect */
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.12); /* Enhanced shadow on hover */
+        tbody tr:nth-child(even) {
+            background-color: #f9f9f9;
         }
 
-        /* Table Data Cells */
-        td {
-            padding: 12px 18px;
-            border-bottom: 1px solid #e0e0e0; /* Light grey separator */
-            vertical-align: middle; /* Center text vertically */
+        tbody tr:hover {
+            background-color: #ecf0f1;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.05); /* Slight shadow on hover */
         }
 
-        /* Wallet Address Styling & Copy Button */
-        .wallet-container {
+        /* --- Editable Cells Styling --- */
+        td[contenteditable="true"] {
+            cursor: text;
+            background-color: #ffffdd; /* Highlight editable cells */
+            transition: background-color 0.3s ease;
+        }
+
+        td[contenteditable="true"]:focus {
+            outline: none; /* Remove default outline */
+            border: 1px solid #3498db; /* Highlight border */
+            background-color: #ffffcc; /* Slightly different highlight on focus */
+            box-shadow: 0 0 5px rgba(52, 152, 219, 0.5); /* Glow effect */
+        }
+
+        td.boolean-cell {
+            text-align: center;
+            padding: 12px 10px; /* Adjust padding for checkboxes */
+        }
+
+        td.boolean-cell input[type="checkbox"] {
+            cursor: pointer;
+            transform: scale(1.3); /* Make checkbox slightly larger */
+            accent-color: #3498db; /* Color of the checked state */
+        }
+
+        td.numeric-cell {
+            font-variant-numeric: tabular-nums; /* Helps align numbers */
+        }
+
+        .actions {
             display: flex;
+            gap: 8px; /* Space between action buttons */
+            justify-content: center;
             align-items: center;
-            font-family: 'Consolas', 'Monaco', 'Andale Mono', 'Ubuntu Mono', monospace;
-            font-size: 0.85em;
-            color: #00796b; /* Teal color for wallets */
-            word-break: break-all; /* Break long wallet addresses */
+            min-width: 120px; /* Ensure actions column has enough space */
         }
 
-        .wallet-address {
-            margin-right: 8px; /* Space between address and button */
-            flex-grow: 1; /* Allow address to take available space */
-        }
-
-        .copy-btn {
-            background-color: #1a73e8;
-            color: white;
+        .edit-button, .save-row-button, .cancel-button {
+            padding: 6px 12px;
             border: none;
-            padding: 5px 10px;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 0.8em;
-            transition: background-color 0.3s ease;
-            white-space: nowrap; /* Prevent button text from wrapping */
+            font-size: 0.9rem;
+            font-weight: bold;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
         }
 
-        .copy-btn:hover {
-            background-color: #0f5ec1;
+        .edit-button {
+            background-color: #f39c12;
+            color: white;
+        }
+        .edit-button:hover {
+            background-color: #e67e22;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        .edit-button:active {
+            transform: translateY(1px);
         }
 
-        .copy-btn.copied { /* Style for when copied */
-            background-color: #34a853; /* Green */
-            cursor: default;
+        .save-row-button {
+            background-color: #2ecc71;
+            color: white;
+        }
+        .save-row-button:hover {
+            background-color: #27ae60;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        .save-row-button:active {
+            transform: translateY(1px);
         }
 
-        /* Responsive Design */
-        @media (max-width: 992px) { /* Medium screens and below */
-            h1 {
-                font-size: 2em;
-            }
-            .container {
-                padding: 20px;
-            }
-            th, td {
-                padding: 10px 12px;
-            }
-            .notes {
-                padding: 15px;
-            }
-            .notes li {
-                font-size: 1em;
-            }
-
-            .search-container {
-                max-width: 100%; /* Full width on smaller screens */
-            }
-
-            /* Stack table cells for very small screens */
-            table, thead, tbody, th, td, tr {
-                display: block;
-            }
-            thead tr {
-                position: absolute;
-                top: -9999px;
-                left: -9999px;
-            }
-            tr { border: 1px solid #ccc; margin-bottom: 10px; }
-            td {
-                border: none;
-                border-bottom: 1px solid #eee;
-                position: relative;
-                padding-left: 50%;
-                text-align: right; /* Align data to the right when stacked */
-                word-wrap: break-word; /* Allow word wrapping in stacked cells */
-            }
-            td:before {
-                position: absolute;
-                top: 6px;
-                left: 6px;
-                width: 45%;
-                padding-right: 10px;
-                white-space: nowrap;
-                content: attr(data-label); /* Use data-label attribute */
-                font-weight: bold;
-                color: #333;
-                text-align: left; /* Align label to the left */
-            }
-            .wallet-container {
-                flex-direction: column; /* Stack wallet and button */
-                align-items: flex-end; /* Align items to the right */
-                text-align: right;
-            }
-            .wallet-address {
-                 margin-right: 0; /* Remove margin when stacked */
-                 margin-bottom: 5px; /* Space between address and button when stacked */
-                 width: 100%; /* Make address take full width when stacked */
-            }
-             .wallet-address:before {
-                content: "Wallet Address:"; /* Specific label for wallet */
-            }
-            .copy-btn {
-                width: 100%; /* Make button take full width when stacked */
-            }
+        .cancel-button {
+            background-color: #e74c3c;
+            color: white;
+        }
+        .cancel-button:hover {
+            background-color: #c0392b;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        .cancel-button:active {
+            transform: translateY(1px);
         }
 
-        /* Further adjustments for very small screens */
-        @media (max-width: 576px) {
-            body {
-                padding: 10px;
-            }
-            .container {
-                padding: 15px;
-            }
-            h1 {
-                font-size: 1.7em;
-            }
-            .notes {
-                padding: 10px;
-            }
-            .notes h3 {
-                font-size: 1.2em;
-            }
-            th, td {
-                padding: 8px 10px;
-            }
-             td:before {
-                top: 3px;
-                left: 3px;
-            }
+        .spinner {
+            border: 4px solid #f3f3f3; /* Light grey */
+            border-top: 4px solid #3498db; /* Blue */
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+            display: none; /* Hidden by default */
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #2ecc71;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            z-index: 1000;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            opacity: 0; /* Hidden by default */
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        .notification.show {
+            opacity: 1;
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <!-- Modified Header -->
-        <h1>Season 2 & 3 User Data - PXFX Overview</h1>
+    <!-- --- Main Application Container --- -->
+    <h1>User Data Management</h1>
 
-        <!-- Search Bar -->
-        <div class="search-container">
-            <input type="text" id="searchInput" placeholder="Search by Username, Wallet, or Chat ID...">
-            <button onclick="searchTable()">Search</button>
-        </div>
+    <!-- --- Control Section: Search and Save --- -->
+    <div class="controls">
+        <input type="text" id="searchBox" placeholder="Search by username, chat ID, or wallet...">
+        <button id="saveAllButton">Save All Changes</button>
+    </div>
 
-        <!-- Modified Notes Section -->
-        <div class="notes">
-            <h3>Important Information Regarding User Data & PXFX</h3>
-            <ul>
-                <li>This page displays consolidated user data from Season 2 and Season 3.</li>
-                <li><strong>Balance Adjustments:</strong>
-                    <ul>
-                        <li>Users present in Season 2 received a <strong>5% increase</strong>.</li>
-                        <li>Users present in Season 3 received a <strong>1% increase</strong>.</li>
-                        <li>Users in <strong>both seasons</strong> received a combined <strong>6% increase</strong> (5% + 1%).</li>
-                    </ul>
-                </li>
-                <li><strong>PXFX Information:</strong></li>
-                <li>All displayed figures represent your total received PXFX (or equivalent currency) based on the calculated balances.</li>
-                <li>Please review the data below carefully.</li>
-            </ul>
-        </div>
-
-        <table id="userTable">
+    <!-- --- Data Display Area --- -->
+    <div class="data-container">
+        <!-- The table will be populated here by JavaScript -->
+        <table id="dataTable">
             <thead>
                 <tr>
-                    <th data-label="Chat ID">Chat ID</th>
-                    <th data-label="Username">Username</th>
-                    <th data-label="Balance">Balance</th>
-                    <th data-label="Referrals">Referrals</th>
-                    <th data-label="Wallet">Wallet</th>
-                    <th data-label="Farming Start Time">Farming Start Time</th>
-                    <th data-label="Has Claimed Welcome Bonus">Welcome Bonus Claimed</th>
-                    <th data-label="Last Withdrawal">Last Withdrawal</th>
-                    <th data-label="Last Claim Timestamp">Last Claim Timestamp</th>
-                    <th data-label="Last Daily Claim Day">Last Daily Claim Day</th>
-                    <th data-label="Referred By">Referred By</th>
+                    <th>Chat ID</th>
+                    <th>Username</th>
+                    <th>Balance</th>
+                    <th>Referrals</th>
+                    <th>Wallet Address</th>
+                    <th>Farming Start Time</th>
+                    <th>Claimed Welcome Bonus</th>
+                    <th>Last Withdrawal</th>
+                    <th>Last Claim Timestamp</th>
+                    <th>Last Daily Claim Day</th>
+                    <th>Referred By</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
-                <!-- Row 1 -->
-                <tr>
-                    <td data-label="Chat ID">229827102</td>
-                    <td data-label="Username">Ex7667336e3179</td>
-                    <td data-label="Balance">97177.8174</td>
-                    <td data-label="Referrals">0</td>
-                    <td data-label="Wallet">
-                        <div class="wallet-container">
-                            <span class="wallet-address">UQBvS7egoWQvNemTVjOXapsE-5yHPjqM5QUN2PIKH3K</span>
-                            <button class="copy-btn" onclick="copyToClipboard(this, 'UQBvS7egoWQvNemTVjOXapsE-5yHPjqM5QUN2PIKH3K')">Copy</button>
-                        </div>
-                    </td>
-                    <td data-label="Farming Start Time">1.76E+12</td>
-                    <td data-label="Has Claimed Welcome Bonus">TRUE</td>
-                    <td data-label="Last Withdrawal">0</td>
-                    <td data-label="Last Claim Timestamp">1.76E+12</td>
-                    <td data-label="Last Daily Claim Day">6</td>
-                    <td data-label="Referred By"></td>
-                </tr>
-                <!-- Row 2 -->
-                <tr>
-                    <td data-label="Chat ID">290011572</td>
-                    <td data-label="Username">MagySalim</td>
-                    <td data-label="Balance">7205.2851</td>
-                    <td data-label="Referrals">0</td>
-                    <td data-label="Wallet">
-                        <div class="wallet-container">
-                            <span class="wallet-address">UQBUIf0nWGjdxI3HiLdSGPvxuxKdZeIXQ3rPA4L3sFSLc-fv</span>
-                            <button class="copy-btn" onclick="copyToClipboard(this, 'UQBUIf0nWGjdxI3HiLdSGPvxuxKdZeIXQ3rPA4L3sFSLc-fv')">Copy</button>
-                        </div>
-                    </td>
-                    <td data-label="Farming Start Time">1.76E+12</td>
-                    <td data-label="Has Claimed Welcome Bonus">TRUE</td>
-                    <td data-label="Last Withdrawal">0</td>
-                    <td data-label="Last Claim Timestamp">1.76E+12</td>
-                    <td data-label="Last Daily Claim Day">1</td>
-                    <td data-label="Referred By">7292247729</td>
-                </tr>
-                <!-- Row 3 -->
-                <tr>
-                    <td data-label="Chat ID">847775343</td>
-                    <td data-label="Username">uzabiliti</td>
-                    <td data-label="Balance">24523.5864</td>
-                    <td data-label="Referrals">0</td>
-                    <td data-label="Wallet">
-                        <div class="wallet-container">
-                            <span class="wallet-address">UQAejOldeFiVnFJh1KosiTCQvv369Pseikht3s6bne4tjZmM</span>
-                            <button class="copy-btn" onclick="copyToClipboard(this, 'UQAejOldeFiVnFJh1KosiTCQvv369Pseikht3s6bne4tjZmM')">Copy</button>
-                        </div>
-                    </td>
-                    <td data-label="Farming Start Time">1.76E+12</td>
-                    <td data-label="Has Claimed Welcome Bonus">TRUE</td>
-                    <td data-label="Last Withdrawal">0</td>
-                    <td data-label="Last Claim Timestamp">1.76E+12</td>
-                    <td data-label="Last Daily Claim Day">1</td>
-                    <td data-label="Referred By">7292247729</td>
-                </tr>
-                <!-- Row 4 -->
-                <tr>
-                    <td data-label="Chat ID">960798135</td>
-                    <td data-label="Username">AeIsmail</td>
-                    <td data-label="Balance">133742.1774</td>
-                    <td data-label="Referrals">2</td>
-                    <td data-label="Wallet">
-                        <div class="wallet-container">
-                            <span class="wallet-address">UQDwUEx56QIIUkAxegVCqEVrOLSRUIRsFqOePvxblodwdnj7</span>
-                            <button class="copy-btn" onclick="copyToClipboard(this, 'UQDwUEx56QIIUkAxegVCqEVrOLSRUIRsFqOePvxblodwdnj7')">Copy</button>
-                        </div>
-                    </td>
-                    <td data-label="Farming Start Time">1.76E+12</td>
-                    <td data-label="Has Claimed Welcome Bonus">TRUE</td>
-                    <td data-label="Last Withdrawal"></td>
-                    <td data-label="Last Claim Timestamp">1.76E+12</td>
-                    <td data-label="Last Daily Claim Day">6</td>
-                    <td data-label="Referred By"></td>
-                </tr>
-                <!-- Row 5 -->
-                <tr>
-                    <td data-label="Chat ID">5194246164</td>
-                    <td data-label="Username">fixal13</td>
-                    <td data-label="Balance">14638.5700</td>
-                    <td data-label="Referrals">0</td>
-                    <td data-label="Wallet">
-                        <div class="wallet-container">
-                            <span class="wallet-address">UQDKON2fRTBdHjScje7swNEprzyY_cyE6CcYNBLzmMNRsp8i</span>
-                            <button class="copy-btn" onclick="copyToClipboard(this, 'UQDKON2fRTBdHjScje7swNEprzyY_cyE6CcYNBLzmMNRsp8i')">Copy</button>
-                        </div>
-                    </td>
-                    <td data-label="Farming Start Time">1.76E+12</td>
-                    <td data-label="Has Claimed Welcome Bonus">TRUE</td>
-                    <td data-label="Last Withdrawal">0</td>
-                    <td data-label="Last Claim Timestamp">1.76E+12</td>
-                    <td data-label="Last Daily Claim Day">1</td>
-                    <td data-label="Referred By">7292247729</td>
-                </tr>
-                <!-- Row 6 -->
-                <tr>
-                    <td data-label="Chat ID">5999257258</td>
-                    <td data-label="Username">ITS_SOYKOT_102</td>
-                    <td data-label="Balance">6619.6450</td>
-                    <td data-label="Referrals">11</td>
-                    <td data-label="Wallet">
-                        <div class="wallet-container">
-                            <span class="wallet-address">UQCeav8IzZAZ640dQiRUYXLPL35F4qwjxW9U8n7IipGAY5KF</span>
-                            <button class="copy-btn" onclick="copyToClipboard(this, 'UQCeav8IzZAZ640dQiRUYXLPL35F4qwjxW9U8n7IipGAY5KF')">Copy</button>
-                        </div>
-                    </td>
-                    <td data-label="Farming Start Time">1.76E+12</td>
-                    <td data-label="Has Claimed Welcome Bonus">TRUE</td>
-                    <td data-label="Last Withdrawal">0</td>
-                    <td data-label="Last Claim Timestamp">1.76E+12</td>
-                    <td data-label="Last Daily Claim Day">4</td>
-                    <td data-label="Referred By">7572875104</td>
-                </tr>
-                <!-- Row 7 -->
-                <tr>
-                    <td data-label="Chat ID">6375799266</td>
-                    <td data-label="Username">Ivnchshn</td>
-                    <td data-label="Balance">8315.0367</td>
-                    <td data-label="Referrals">0</td>
-                    <td data-label="Wallet">
-                        <div class="wallet-container">
-                            <span class="wallet-address">UQBXXcNr_-V2L9cUySHCQzXry1Q7OBXSe2mRWKAePcPQvTAu</span>
-                            <button class="copy-btn" onclick="copyToClipboard(this, 'UQBXXcNr_-V2L9cUySHCQzXry1Q7OBXSe2mRWKAePcPQvTAu')">Copy</button>
-                        </div>
-                    </td>
-                    <td data-label="Farming Start Time">1.76E+12</td>
-                    <td data-label="Has Claimed Welcome Bonus">TRUE</td>
-                    <td data-label="Last Withdrawal">0</td>
-                    <td data-label="Last Claim Timestamp">1.76E+12</td>
-                    <td data-label="Last Daily Claim Day">6</td>
-                    <td data-label="Referred By">7292247729</td>
-                </tr>
-                <!-- Row 8 -->
-                <tr>
-                    <td data-label="Chat ID">6588322907</td>
-                    <td data-label="Username">CA0571</td>
-                    <td data-label="Balance">7163.2551</td>
-                    <td data-label="Referrals">11</td>
-                    <td data-label="Wallet">
-                        <div class="wallet-container">
-                            <span class="wallet-address">UQDRA4JGufpHcP9xmmyUdCqO0UGx7Pb5Xh6hDIOJfUtj1vpE</span>
-                            <button class="copy-btn" onclick="copyToClipboard(this, 'UQDRA4JGufpHcP9xmmyUdCqO0UGx7Pb5Xh6hDIOJfUtj1vpE')">Copy</button>
-                        </div>
-                    </td>
-                    <td data-label="Farming Start Time">1.76E+12</td>
-                    <td data-label="Has Claimed Welcome Bonus">TRUE</td>
-                    <td data-label="Last Withdrawal">0</td>
-                    <td data-label="Last Claim Timestamp">1.76E+12</td>
-                    <td data-label="Last Daily Claim Day">5</td>
-                    <td data-label="Referred By"></td>
-                </tr>
-                <!-- Row 9 -->
-                <tr>
-                    <td data-label="Chat ID">7221039184</td>
-                    <td data-label="Username">testmaler</td>
-                    <td data-label="Balance">21828.5883</td>
-                    <td data-label="Referrals">0</td>
-                    <td data-label="Wallet">
-                        <div class="wallet-container">
-                            <span class="wallet-address">UQA_F5oDoG1OiLV5_5Emvy7QJ4QOLSnwnTSFuqinmgZHJ6N4</span>
-                            <button class="copy-btn" onclick="copyToClipboard(this, 'UQA_F5oDoG1OiLV5_5Emvy7QJ4QOLSnwnTSFuqinmgZHJ6N4')">Copy</button>
-                        </div>
-                    </td>
-                    <td data-label="Farming Start Time">1.76E+12</td>
-                    <td data-label="Has Claimed Welcome Bonus">TRUE</td>
-                    <td data-label="Last Withdrawal">0</td>
-                    <td data-label="Last Claim Timestamp"></td>
-                    <td data-label="Last Daily Claim Day"></td>
-                    <td data-label="Referred By"></td>
-                </tr>
-                <!-- Row 10 -->
-                <tr>
-                    <td data-label="Chat ID">7848148646</td>
-                    <td data-label="Username">lord02025</td>
-                    <td data-label="Balance">41480.5142</td>
-                    <td data-label="Referrals"></td>
-                    <td data-label="Wallet">
-                        <div class="wallet-container">
-                            <span class="wallet-address">UQCtQIvxXZtISfLNByO3QluvYMV5bJvRGWYrOlopshWDjokE</span>
-                            <button class="copy-btn" onclick="copyToClipboard(this, 'UQCtQIvxXZtISfLNByO3QluvYMV5bJvRGWYrOlopshWDjokE')">Copy</button>
-                        </div>
-                    </td>
-                    <td data-label="Farming Start Time">1.76E+12</td>
-                    <td data-label="Has Claimed Welcome Bonus">TRUE</td>
-                    <td data-label="Last Withdrawal">1.76E+12</td>
-                    <td data-label="Last Claim Timestamp">1.76E+12</td>
-                    <td data-label="Last Daily Claim Day">2</td>
-                    <td data-label="Referred By"></td>
-                </tr>
-                <!-- Add more rows here if you have more data -->
+                <!-- Data rows will be dynamically added here -->
             </tbody>
         </table>
     </div>
 
+    <!-- --- Embedded JavaScript --- -->
     <script>
-        // --- Responsive Table Script ---
-        document.addEventListener('DOMContentLoaded', function() {
-            const table = document.querySelector('table');
-            const headers = Array.from(table.querySelectorAll('th'));
-            const dataRows = Array.from(table.querySelectorAll('tbody tr'));
+        // --- MAIN SCRIPT EXECUTION STARTS HERE ---
+        // This script will run when the HTML page is fully loaded.
+        document.addEventListener('DOMContentLoaded', () => {
 
-            dataRows.forEach(row => {
-                const cells = Array.from(row.querySelectorAll('td'));
-                cells.forEach((cell, index) => {
-                    // Only add data-label if it's not already set by the direct HTML
-                    if (!cell.hasAttribute('data-label')) {
-                        const headerText = headers[index].getAttribute('data-label');
-                        cell.setAttribute('data-label', headerText);
-                    }
-                });
-            });
-        });
+            // --- Configuration ---
+            const localStorageKey = 'userDataSingleFile'; // Unique key for localStorage
 
-        // --- Copy to Clipboard Function ---
-        function copyToClipboard(button, text) {
-            navigator.clipboard.writeText(text).then(() => {
-                // Change button text and style to indicate success
-                const originalText = button.textContent;
-                button.textContent = 'Copied!';
-                button.classList.add('copied');
+            // --- Data: Replace this with your actual loaded CSV data ---
+            // For demonstration, we'll use the data you provided.
+            // In a real application, you'd fetch and parse your CSV files here.
+            // The format is an array of JavaScript objects, where each object represents a user.
+            let usersData = [
+                // Data from season 3.csv / data season 2.csv
+                { chatId: 229827102, username: 'Ex7667336e3179', balance: 4627.51526, referrals: 0, wallet: 'UQBvS7egoWQvNemTVjOXapsE-5yHPjqM5QUt_0QUN2PIKH3K', farming_start_time: 1757430000000, has_claimed_welcome_bonus: true, lastWithdrawal: 0, last_claim_timestamp: 1757430000000, last_daily_claim_day: 6, referredBy: null },
+                { chatId: 290011572, username: 'MagySalim', balance: 339.87068, referrals: 0, wallet: 'UQBUIf0nWGjdxI3HiLdSGPvxuxKdZeIXQ3rPA4L3sFSLc-fv', farming_start_time: 1757390000000, has_claimed_welcome_bonus: true, lastWithdrawal: 0, last_claim_timestamp: 1756040000000, last_daily_claim_day: 1, referredBy: '7292247729' },
+                { chatId: 847775343, username: 'uzabiliti', balance: 1156.36126, referrals: 0, wallet: 'UQAejOldeFiVnFJh1KosiTCQvv369Pseikht3s6bne4tjZmM', farming_start_time: 1757400000000, has_claimed_welcome_bonus: true, lastWithdrawal: 0, last_claim_timestamp: 1757050000000, last_daily_claim_day: 1, referredBy: '7292247729' },
+                { chatId: 960798135, username: 'AeIsmail', balance: 690.40786, referrals: 2, wallet: 'UQDwUEx56QIIUkAxegVCqEVrOLSRUIRsFqOePvxblodwdnj7', farming_start_time: 1757420000000, has_claimed_welcome_bonus: true, lastWithdrawal: null, last_claim_timestamp: 1757370000000, last_daily_claim_day: 6, referredBy: null },
+                { chatId: 5194246164, username: 'fixal13', balance: 690.41, referrals: 0, wallet: 'UQDKON2fRTBdHjScje7swNEprzyY_cyE6CcYNBLzmMNRsp8i', farming_start_time: 1757430000000, has_claimed_welcome_bonus: true, lastWithdrawal: 0, last_claim_timestamp: 1756770000000, last_daily_claim_day: 1, referredBy: '7292247729' },
+                { chatId: 5999257258, username: 'ITS_SOYKOT_102', balance: 315.22, referrals: 11, wallet: 'UQCeav8IzZAZ640dQiRUYXLPL35F4qwjxW9U8n7IipGAY5KF', farming_start_time: 1757430000000, has_claimed_welcome_bonus: true, lastWithdrawal: 0, last_claim_timestamp: 1757380000000, last_daily_claim_day: 4, referredBy: '7572875104' },
+                { chatId: 6375799266, username: 'Ivnchshn', balance: 395.95, referrals: 0, wallet: 'UQBXXcNr_-V2L9cUySHCQzXry1Q7OBXSe2mRWKAePcPQvTAu', farming_start_time: 1757430000000, has_claimed_welcome_bonus: true, lastWithdrawal: 0, last_claim_timestamp: 1757390000000, last_daily_claim_day: 6, referredBy: '7292247729' },
+                { chatId: 6588322907, username: 'CA0571', balance: 337.77405, referrals: 11, wallet: 'UQDRA4JGufpHcP9xmmyUdCqO0UGx7Pb5Xh6hDIOJfUtj1vpE', farming_start_time: 1757420000000, has_claimed_welcome_bonus: true, lastWithdrawal: 0, last_claim_timestamp: 1757380000000, last_daily_claim_day: 5, referredBy: null },
+                { chatId: 7221039184, username: 'testmaler', balance: 1080.62, referrals: 0, wallet: 'UQA_F5oDoG1OiLV5_5Emvy7QJ4QOLSnwnTSFuqinmgZHJ6N4', farming_start_time: 1757170000000, has_claimed_welcome_bonus: true, lastWithdrawal: 0, last_claim_timestamp: null, last_daily_claim_day: null, referredBy: null },
+                { chatId: 7848148646, username: 'lord02025', balance: 1956.68, referrals: null, wallet: 'UQCtQIvxXZtISfLNByO3QluvYMV5bJvRGWYrOlopshWDjokE', farming_start_time: 1757020000000, has_claimed_welcome_bonus: true, lastWithdrawal: 1756880000000, last_claim_timestamp: 1756680000000, last_daily_claim_day: 2, referredBy: null }
+                // Add more user objects here if you have more data
+            ];
 
-                // Revert after a few seconds
-                setTimeout(() => {
-                    button.textContent = originalText;
-                    button.classList.remove('copied');
-                }, 2000); // 2 seconds
-            }).catch(err => {
-                console.error('Failed to copy text: ', err);
-                // Optionally, provide user feedback for failure
-                const originalText = button.textContent;
-                button.textContent = 'Failed!';
-                button.classList.add('error'); // You might want to add an .error class for styling
-                 setTimeout(() => {
-                    button.textContent = originalText;
-                    button.classList.remove('error');
-                }, 2000);
-            });
-        }
+            // --- DOM Elements ---
+            const dataTableBody = document.querySelector('#dataTable tbody'); // The main table body where rows are added
+            const searchBox = document.getElementById('searchBox'); // The input field for searching
+            const saveAllButton = document.getElementById('saveAllButton'); // The button to save all changes
 
-        // --- Search Functionality ---
-        function searchTable() {
-            const input = document.getElementById('searchInput');
-            const filter = input.value.toLowerCase();
-            const table = document.getElementById('userTable');
-            const rows = table.getElementsByTagName('tr');
+            // --- Helper Functions ---
 
-            for (let i = 1; i < rows.length; i++) { // Start from 1 to skip the header row
-                const cells = rows[i].getElementsByTagName('td');
-                let found = false;
+            /**
+             * Formats a timestamp (in milliseconds) into a readable date and time string.
+             * @param {number|null|undefined} timestamp - The timestamp in milliseconds.
+             * @returns {string} Formatted date string or an empty string if timestamp is invalid.
+             */
+            function formatTimestamp(timestamp) {
+                // Check if timestamp is null, undefined, or zero (which can be epoch start)
+                if (timestamp === null || timestamp === undefined || timestamp === 0) return '';
+                try {
+                    // Create a Date object from the timestamp
+                    const date = new Date(Number(timestamp));
+                    // Use toLocaleString for a user-friendly, locale-aware date/time format
+                    return date.toLocaleString();
+                } catch (e) {
+                    // Log any errors during date formatting
+                    console.error("Error formatting timestamp:", timestamp, e);
+                    // Return the original timestamp as a string if formatting fails
+                    return String(timestamp);
+                }
+            }
 
-                // Iterate through relevant cells for searching
-                // Index 0: Chat ID, Index 1: Username, Index 4: Wallet
-                const searchIndices = [0, 1, 4];
+            /**
+             * Parses a string value into a floating-point number.
+             * Handles null, undefined, empty strings, and non-numeric values by returning 0.
+             * @param {string|number|null|undefined} value - The value to parse.
+             * @returns {number} The parsed number, or 0 if parsing fails.
+             */
+            function parseNumber(value) {
+                if (value === null || value === '' || value === undefined) return 0; // Default for missing numeric values
+                const parsed = parseFloat(value); // Convert to floating point number
+                return isNaN(parsed) ? 0 : parsed; // Return 0 if it's Not-a-Number
+            }
 
-                for (let j = 0; j < cells.length; j++) {
-                    // Check if the current cell index is one we want to search in
-                    if (searchIndices.includes(j)) {
-                        const cellText = cells[j].textContent.toLowerCase();
+            /**
+             * Parses a value into a boolean. Handles common string representations of boolean.
+             * @param {string|boolean|number|null|undefined} value - The value to parse.
+             * @returns {boolean} The boolean representation.
+             */
+            function parseBoolean(value) {
+                if (value === null || value === undefined) return false; // Default to false for null/undefined
+                if (typeof value === 'boolean') return value; // If it's already a boolean, return it
+                if (typeof value === 'string') {
+                    const lowerVal = value.toLowerCase(); // Convert to lowercase for case-insensitive comparison
+                    return lowerVal === 'true' || lowerVal === 'yes' || lowerVal === '1'; // Check for common 'true' representations
+                }
+                return Boolean(value); // Attempt to convert other types to boolean
+            }
 
-                        // For the wallet column, we need to get the text from the span within the div
-                        if (j === 4) { // Wallet column
-                            const walletSpan = cells[j].querySelector('.wallet-address');
-                            if (walletSpan) {
-                                const walletText = walletSpan.textContent.toLowerCase();
-                                if (walletText.includes(filter)) {
-                                    found = true;
-                                    break; // Found a match, no need to check other cells in this row
-                                }
-                            }
-                        } else { // For Chat ID and Username
-                            if (cellText.includes(filter)) {
-                                found = true;
-                                break; // Found a match
-                            }
+            /**
+             * Creates a single table row (<tr>) element for a given user object.
+             * This function is responsible for structuring the data into cells (<td>).
+             * @param {object} user - The user object containing all user data.
+             * @returns {HTMLTableRowElement} The created table row element.
+             */
+            function createUserRow(user) {
+                const row = document.createElement('tr'); // Create a new table row element
+                row.setAttribute('data-chatid', user.chatId); // Store the user's chatId as a data attribute for easy lookup
+
+                // --- Define the data for each cell in the row ---
+                // Each object defines:
+                // key: The property name in the user object.
+                // value: The display value for the cell.
+                // editable: Whether the user can directly edit this cell's content.
+                // type: Specific handling for data types (number, boolean, timestamp).
+                const cellsData = [
+                    { key: 'chatId', value: user.chatId, editable: false, type: 'id' }, // Chat ID is usually not editable directly
+                    { key: 'username', value: user.username, editable: true, type: 'text' },
+                    { key: 'balance', value: user.balance.toFixed(4), editable: true, type: 'number' }, // Display balance with 4 decimal places
+                    { key: 'referrals', value: user.referrals !== null && user.referrals !== undefined ? user.referrals : 0, editable: true, type: 'number' }, // Default referrals to 0 if null/undefined
+                    { key: 'wallet', value: user.wallet, editable: true, type: 'text' },
+                    // Timestamps are usually displayed but not directly edited in this UI.
+                    // If you need to edit them, change `editable: false` to `true` and `type: 'timestamp'` to handle date input.
+                    { key: 'farming_start_time', value: formatTimestamp(user.farming_start_time), editable: false, type: 'timestamp' },
+                    { key: 'has_claimed_welcome_bonus', value: user.has_claimed_welcome_bonus, editable: true, type: 'boolean' }, // Boolean handled by a checkbox
+                    { key: 'lastWithdrawal', value: formatTimestamp(user.lastWithdrawal), editable: false, type: 'timestamp' },
+                    { key: 'last_claim_timestamp', value: formatTimestamp(user.last_claim_timestamp), editable: false, type: 'timestamp' },
+                    { key: 'last_daily_claim_day', value: user.last_daily_claim_day !== null && user.last_daily_claim_day !== undefined ? user.last_daily_claim_day : '', editable: false, type: 'number' }, // Display day, or empty if null/undefined
+                    { key: 'referredBy', value: user.referredBy || '', editable: true, type: 'text' }, // Display referredBy, or empty string if null/undefined
+                ];
+
+                // --- Loop through cell data to create and append each <td> to the <tr> ---
+                cellsData.forEach(({ key, value, editable, type }) => {
+                    const cell = document.createElement('td'); // Create a table data cell
+                    cell.setAttribute('data-key', key); // Store the key for easy access later
+
+                    // --- Cell Content Handling based on type ---
+                    if (type === 'boolean') {
+                        // Create a checkbox for boolean values
+                        const checkbox = document.createElement('input');
+                        checkbox.type = 'checkbox';
+                        checkbox.checked = value; // Set its initial state
+                        checkbox.disabled = !editable; // Disable if the field is not editable
+                        cell.appendChild(checkbox); // Add checkbox to the cell
+                        cell.classList.add('boolean-cell'); // Add class for styling
+                    } else {
+                        // For text, numbers, and timestamps, set text content
+                        cell.textContent = value; // Set the displayed text
+                        if (editable) {
+                            cell.setAttribute('contenteditable', 'true'); // Make it editable
+                            cell.classList.add('editable-cell'); // Add class for styling
+                        }
+                        if (type === 'number') {
+                            cell.classList.add('numeric-cell'); // Add class for numeric styling
+                        }
+                        if (type === 'timestamp') {
+                            cell.classList.add('timestamp-cell');
+                            // Store original timestamp if needed for re-editing (optional, as we don't edit timestamps directly here)
+                            cell.setAttribute('data-original-timestamp', user[key] || '');
+                        }
+                        if (type === 'id') {
+                            cell.setAttribute('contenteditable', 'false'); // Ensure IDs are never editable via this UI
                         }
                     }
-                }
+                    row.appendChild(cell); // Add the created cell to the row
+                });
 
-                if (found) {
-                    rows[i].style.display = ''; // Show the row
+                // --- Actions Cell: Contains Edit, Save, Cancel buttons ---
+                const actionsCell = document.createElement('td');
+                actionsCell.classList.add('actions');
+
+                // Create the "Edit" button
+                const editButton = document.createElement('button');
+                editButton.textContent = 'Edit';
+                editButton.classList.add('edit-button');
+                // Add an event listener: when clicked, it calls toggleRowEdit to make the row editable
+                editButton.onclick = () => toggleRowEdit(row, true);
+                actionsCell.appendChild(editButton); // Add Edit button to the actions cell
+                row.appendChild(actionsCell); // Add the actions cell to the row
+
+                return row; // Return the fully constructed row element
+            }
+
+            /**
+             * Renders all users from the `usersData` array into the table body.
+             * It first clears any existing rows and then appends new ones.
+             * @param {Array<object>} users - An array of user objects to render.
+             */
+            function renderTable(users) {
+                dataTableBody.innerHTML = ''; // Clear all existing rows from the table body
+                users.forEach(user => {
+                    const row = createUserRow(user); // Create a row for each user
+                    dataTableBody.appendChild(row); // Add the row to the table body
+                });
+            }
+
+            /**
+             * Loads user data from the browser's localStorage.
+             * If no data is found, it uses the initial `usersData` defined in the script.
+             * It also ensures data types are correctly parsed (e.g., numbers, booleans).
+             */
+            function loadData() {
+                const savedData = localStorage.getItem(localStorageKey); // Get data from localStorage
+                if (savedData) {
+                    try {
+                        const parsedSavedData = JSON.parse(savedData); // Parse the JSON string back into a JavaScript object
+                        // Ensure all data types are correct upon loading
+                        usersData = parsedSavedData.map(user => ({
+                            ...user, // Copy all properties from the saved user object
+                            // Re-parse specific fields to ensure correct data types
+                            balance: parseNumber(user.balance),
+                            referrals: parseNumber(user.referrals),
+                            farming_start_time: user.farming_start_time ? Number(user.farming_start_time) : null, // Convert to Number, handle null
+                            lastWithdrawal: user.lastWithdrawal ? Number(user.lastWithdrawal) : 0,
+                            last_claim_timestamp: user.last_claim_timestamp ? Number(user.last_claim_timestamp) : null,
+                            last_daily_claim_day: user.last_daily_claim_day !== null && user.last_daily_claim_day !== undefined ? Number(user.last_daily_claim_day) : null,
+                            has_claimed_welcome_bonus: parseBoolean(user.has_claimed_welcome_bonus) // Parse as boolean
+                        }));
+                    } catch (e) {
+                        console.error("Error parsing localStorage data:", e);
+                        // If localStorage data is corrupted or invalid, fall back to the initial data
+                        // Make a copy to avoid modifying the original `usersData` definition
+                        usersData = usersData.map(user => ({ ...user }));
+                    }
                 } else {
-                    rows[i].style.display = 'none'; // Hide the row
+                    // If no data is in localStorage, use the initial data defined in the script
+                    // Make a copy to ensure changes don't affect the initial definition
+                    usersData = usersData.map(user => ({ ...user }));
+                }
+                renderTable(usersData); // Render the loaded or initial data into the table
+            }
+
+            /**
+             * Saves the current state of `usersData` to the browser's localStorage.
+             * This function is called when the "Save All Changes" button is clicked or after a row is saved.
+             */
+            function saveData() {
+                try {
+                    localStorage.setItem(localStorageKey, JSON.stringify(usersData)); // Convert `usersData` to a JSON string and save it
+                    console.log('Data saved to localStorage.');
+                    showNotification('All changes saved!'); // Show a confirmation message
+                } catch (e) {
+                    console.error("Error saving to localStorage:", e);
+                    showNotification('Error saving data!', 'red'); // Show an error message if saving fails
                 }
             }
-        }
 
-        // Optional: Trigger search on pressing Enter in the input field
-        document.getElementById('searchInput').addEventListener('keypress', function(event) {
-            if (event.key === 'Enter') {
-                event.preventDefault(); // Prevent default form submission if it were a form
-                searchTable();
+            /**
+             * Updates a specific user's data within the `usersData` array.
+             * It finds the user by `chatId` and merges the `updatedData` into their record.
+             * @param {number} chatId - The ID of the user to update.
+             * @param {object} updatedData - An object containing the new key-value pairs for the user.
+             * @returns {boolean} True if the user was found and updated, false otherwise.
+             */
+            function updateUserInDataArray(chatId, updatedData) {
+                const userIndex = usersData.findIndex(user => user.chatId === chatId); // Find the index of the user
+                if (userIndex > -1) {
+                    // If user found, update their record by merging old and new data
+                    usersData[userIndex] = { ...usersData[userIndex], ...updatedData };
+                    return true; // Indicate success
+                }
+                return false; // Indicate user not found
             }
-        });
 
+            /**
+             * Handles the toggling of edit mode for a table row.
+             * It shows/hides edit/save/cancel buttons and makes cells editable or read-only.
+             * @param {HTMLTableRowElement} row - The table row element to toggle.
+             * @param {boolean} isEditing - True to enter edit mode, false to exit edit mode.
+             */
+            function toggleRowEdit(row, isEditing) {
+                // Select all editable cells (contenteditable or checkboxes) within the row
+                const cells = row.querySelectorAll('td[contenteditable="true"], td.boolean-cell input[type="checkbox"]');
+                const actionsCell = row.querySelector('.actions'); // The cell holding action buttons
+
+                if (isEditing) {
+                    // --- Entering Edit Mode ---
+                    // 1. Enable editing for all selected cells
+                    cells.forEach(cell => {
+                        if (cell.tagName === 'INPUT' && cell.type === 'checkbox') {
+                            cell.disabled = false; // Enable checkbox
+                        } else {
+                            cell.setAttribute('contenteditable', 'true'); // Make text cells editable
+                        }
+                    });
+
+                    // 2. Store original values before editing begins
+                    // This is crucial for the "Cancel" functionality
+                    row.dataset.originalValues = JSON.stringify(Array.from(cells).map(cell => {
+                        const key = cell.getAttribute('data-key');
+                        if (cell.tagName === 'INPUT' && cell.type === 'checkbox') {
+                            return { key: key, value: cell.checked }; // Store checkbox state
+                        }
+                        return { key: key, value: cell.textContent }; // Store text content
+                    }));
+
+                    // 3. Update Action Buttons: Hide "Edit", show "Save" and "Cancel"
+                    const editButton = row.querySelector('.edit-button');
+                    if(editButton) editButton.style.display = 'none'; // Hide Edit button
+
+                    const saveButton = document.createElement('button');
+                    saveButton.textContent = 'Save';
+                    saveButton.classList.add('save-row-button');
+                    // Add event listener for Save button
+                    saveButton.onclick = () => saveRow(row);
+                    actionsCell.appendChild(saveButton);
+
+                    const cancelButton = document.createElement('button');
+                    cancelButton.textContent = 'Cancel';
+                    cancelButton.classList.add('cancel-button');
+                    // Add event listener for Cancel button
+                    cancelButton.onclick = () => cancelRowEdit(row);
+                    actionsCell.appendChild(cancelButton);
+
+                } else {
+                    // --- Exiting Edit Mode ---
+                    // 1. Disable editing for all selected cells
+                    cells.forEach(cell => {
+                        if (cell.tagName === 'INPUT' && cell.type === 'checkbox') {
+                            cell.disabled = true; // Disable checkbox
+                        } else {
+                            cell.removeAttribute('contenteditable'); // Make text cells read-only
+                        }
+                    });
+
+                    // 2. Clean up stored original values
+                    delete row.dataset.originalValues;
+
+                    // 3. Update Action Buttons: Remove "Save" and "Cancel", show "Edit"
+                    actionsCell.innerHTML = ''; // Clear current buttons
+                    const editButton = document.createElement('button');
+                    editButton.textContent = 'Edit';
+                    editButton.classList.add('edit-button');
+                    editButton.onclick = () => toggleRowEdit(row, true); // Re-attach edit listener
+                    actionsCell.appendChild(editButton); // Add Edit button back
+                }
+            }
+
+            /**
+             * Saves the changes made in a single row.
+             * It reads the updated values from the cells, validates them,
+             * updates the `usersData` array, and then saves to localStorage.
+             * @param {HTMLTableRowElement} row - The table row element with edited data.
+             */
+            function saveRow(row) {
+                const chatId = parseInt(row.getAttribute('data-chatid')); // Get user ID from row attribute
+                const cells = row.querySelectorAll('td[contenteditable="true"], td.boolean-cell input[type="checkbox"]');
+                let updatedUserData = {}; // Object to store the changes for this row
+                let isValid = true; // Flag to track if all data is valid
+
+                // Iterate through all editable cells in the row
+                for (const cell of cells) {
+                    const key = cell.getAttribute('data-key');
+                    let value;
+
+                    // Get the value based on cell type
+                    if (cell.tagName === 'INPUT' && cell.type === 'checkbox') {
+                        value = cell.checked; // Get checkbox state
+                    } else {
+                        value = cell.textContent.trim(); // Get text content and trim whitespace
+                    }
+
+                    // --- Data Validation ---
+                    if (key === 'balance' || key === 'referrals') {
+                        const numValue = parseNumber(value); // Parse as a number
+                        if (isNaN(numValue)) { // Check if parsing failed
+                            alert(`Invalid input for "${key}". Please enter a valid number.`);
+                            isValid = false; // Mark as invalid
+                            return; // Stop processing this cell and subsequent ones in this loop
+                        }
+                        value = numValue; // Use the parsed number value
+                        // Update the displayed cell content to ensure formatting is correct (e.g., 4 decimal places for balance)
+                        if (key === 'balance') {
+                            cell.textContent = value.toFixed(4);
+                        } else {
+                            cell.textContent = value; // For referrals, just display the number
+                        }
+                    }
+                    // Add more validation for other fields as needed (e.g., wallet address format)
+                    if (key === 'wallet' && value && !value.startsWith('UQ')) {
+                        // Basic check for TON wallet format (starts with UQ)
+                        alert(`Invalid wallet address format for "${key}". It should start with 'UQ'.`);
+                        isValid = false;
+                        return;
+                    }
+
+                    updatedUserData[key] = value; // Store the validated value
+                }
+
+                // If all data is valid, proceed with saving
+                if (isValid) {
+                    const success = updateUserInDataArray(chatId, updatedUserData); // Update the main data array
+                    if (success) {
+                        toggleRowEdit(row, false); // Exit edit mode (revert to read-only)
+                        saveData(); // Save all data to localStorage
+                    } else {
+                        console.error(`Failed to update user with chatId ${chatId}`);
+                        alert('An error occurred while saving the row.');
+                    }
+                }
+            }
+
+            /**
+             * Cancels the editing of a row, reverting any changes made since entering edit mode.
+             * @param {HTMLTableRowElement} row - The table row element to cancel editing for.
+             */
+            function cancelRowEdit(row) {
+                const cells = row.querySelectorAll('td[contenteditable="true"], td.boolean-cell input[type="checkbox"]');
+                // Retrieve the original values that were stored when edit mode started
+                const originalValues = JSON.parse(row.dataset.originalValues || '[]');
+
+                // Revert each cell to its original value
+                cells.forEach(cell => {
+                    const key = cell.getAttribute('data-key');
+                    const original = originalValues.find(item => item.key === key); // Find the original value for this key
+
+                    if (original) { // If an original value was found
+                        if (cell.tagName === 'INPUT' && cell.type === 'checkbox') {
+                            cell.checked = original.value; // Revert checkbox state
+                        } else {
+                            cell.textContent = original.value; // Revert text content
+                        }
+                    }
+                });
+
+                toggleRowEdit(row, false); // Exit edit mode (revert to read-only)
+            }
+
+            /**
+             * Displays a temporary notification message at the bottom of the screen.
+             * @param {string} message - The message to display.
+             * @param {string} [color='#2ecc71'] - The background color of the notification (default is green for success).
+             */
+            function showNotification(message, color = '#2ecc71') {
+                const notificationDiv = document.createElement('div');
+                notificationDiv.className = 'notification'; // Add class for styling
+                notificationDiv.textContent = message;
+                notificationDiv.style.backgroundColor = color; // Set background color
+
+                document.body.appendChild(notificationDiv); // Add to the DOM
+                notificationDiv.classList.add('show'); // Make it visible with CSS transition
+
+                // Automatically remove the notification after a few seconds
+                setTimeout(() => {
+                    notificationDiv.classList.remove('show'); // Start hiding transition
+                    notificationDiv.addEventListener('transitionend', () => {
+                        notificationDiv.remove(); // Remove from DOM after transition ends
+                    });
+                }, 3000); // Display for 3 seconds
+            }
+
+            // --- Event Listeners ---
+
+            // 1. Search Box Listener: Filters the table as the user types
+            searchBox.addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase(); // Get search term in lowercase
+                // Filter `usersData` to find users whose username, chatId, or wallet includes the search term
+                const filteredUsers = usersData.filter(user =>
+                    user.username.toLowerCase().includes(searchTerm) ||
+                    String(user.chatId).includes(searchTerm) || // Convert chatId to string for search
+                    (user.wallet && user.wallet.toLowerCase().includes(searchTerm)) // Check if wallet exists and includes term
+                );
+                renderTable(filteredUsers); // Re-render the table with the filtered results
+            });
+
+            // 2. Save All Button Listener: Saves all current data to localStorage
+            saveAllButton.addEventListener('click', saveData);
+
+            // --- Initialization ---
+            // Load data from localStorage or use default data when the page first loads
+            loadData();
+        });
     </script>
 
 </body>
